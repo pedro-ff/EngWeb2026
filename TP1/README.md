@@ -43,17 +43,17 @@ Criar uma ou várias scripts em Python para gerar o website a partir do dataset.
 
 # Lista de Resultados
 
-[dataset_reparacoes.json](/reparacoes.json): dataset fornecido.
+[dataset_reparacoes.json](reparacoes.json): dataset fornecido.
 
-[json2html.py](/json2html.py): programa que gera o website.
+[json2html.py](json2html.py): programa que gera o website.
 
-[index.html](/output/index.html): página inicial.
+[index.html](output/index.html): página inicial.
 
-[reparacoes/index.html](/output/reparacoes/index.html): página com a lista das reparações.
+[reparacoes/index.html](output/reparacoes/index.html): página com a lista das reparações.
 
-[intervencoes/index.html](/output/intervencoes/index.html): página com a lista das intervenções.
+[intervencoes/index.html](output/intervencoes/index.html): página com a lista das intervenções.
 
-[carros/index.html](/output/carros/index.html): página com a lista das marcas e dos modelos dos carros.
+[carros/index.html](output/carros/index.html): página com a lista das marcas e dos modelos dos carros.
 
 Nota: Devido ao elevado número de páginas individuais criadas, estas não foram adicionadas ao repositório.
 
