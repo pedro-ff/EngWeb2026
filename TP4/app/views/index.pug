@@ -1,0 +1,39 @@
+
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal.w3-center
+      h1 Exames Médicos Desportivos
+
+    .w3-container.w3-padding.w3-light-grey.w3-border-bottom
+      .w3-bar
+        a.w3-bar-item.w3-button.w3-teal.w3-round.w3-margin-right(href="/emd/registo")
+          b + Novo Registo
+        a.w3-bar-item.w3-button.w3-blue-grey.w3-round.w3-margin-right(href="/emd/stats")
+          b Estatísticas
+
+        .w3-right
+          span.w3-bar-item(style="padding-top:8px")
+            b Ordenar:
+          a.w3-bar-item.w3-button.w3-white.w3-border.w3-round.w3-margin-right(href="/?sort=dataEMD&order=desc") Data (Desc)
+          a.w3-bar-item.w3-button.w3-white.w3-border.w3-round(href="/?sort=nome.primeiro&order=asc") Nome (Asc)
+
+    .w3-container
+      table.w3-table-all.w3-hoverable.w3-margin-top
+        tr
+          th Nome
+          th Data
+          th Modalidade
+          th Resultado
+          th.w3-center Operações
+        each t in list
+          tr
+            td(onclick=`window.location.href='/emd/${t.id}'` style="cursor:pointer")= t.nome.primeiro + ' ' + t.nome.último
+            td(onclick=`window.location.href='/emd/${t.id}'` style="cursor:pointer")= t.dataEMD
+            td(onclick=`window.location.href='/emd/${t.id}'` style="cursor:pointer")= t.modalidade
+            td(onclick=`window.location.href='/emd/${t.id}'` style="cursor:pointer")= t.resultado ? 'Apto' : 'Não Apto'
+            td.w3-center
+              a.w3-btn.w3-round.w3-blue.w3-small(href=`/emd/editar/${t.id}`) Editar
+              a.w3-btn.w3-round.w3-red.w3-small.w3-margin-left(href=`/emd/apagar/${t.id}` onclick="return confirm('Tem a certeza?')") Apagar
+

@@ -1,0 +1,54 @@
+
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal
+      h2= emd ? "Editar Registo EMD" : "Novo Registo EMD"
+
+    form.w3-container.w3-padding-16(method="POST" action=emd ? `/emd/${emd.id}` : "/emd")
+      fieldset
+        legend Informação Pessoal
+        if emd
+          input(type="hidden" name="id" value=emd.id)
+
+        label Primeiro Nome
+        input.w3-input.w3-round(type="text" name="nome.primeiro" value=emd ? emd.nome.primeiro : "" required)
+
+        label Último Nome
+        input.w3-input.w3-round(type="text" name="nome.último" value=emd ? emd.nome.último : "" required)
+
+        label Idade
+        input.w3-input.w3-round(type="number" name="idade" value=emd ? emd.idade : "" required)
+
+        label Género
+        select.w3-select.w3-round(name="género")
+          option(value="M" selected=emd && emd.género == "M") Masculino
+          option(value="F" selected=emd && emd.género == "F") Feminino
+          option(value="Outro" selected=emd && emd.género == "Outro") Outro
+
+        label Morada
+        input.w3-input.w3-round(type="text" name="morada" value=emd ? emd.morada : "")
+
+        label Email
+        input.w3-input.w3-round(type="email" name="email" value=emd ? emd.email : "")
+
+      fieldset
+        legend Informação Desportiva
+        label Data EMD
+        input.w3-input.w3-round(type="date" name="dataEMD" value=emd ? emd.dataEMD : "" required)
+
+        label Modalidade
+        input.w3-input.w3-round(type="text" name="modalidade" value=emd ? emd.modalidade : "" required)
+
+        label Clube
+        input.w3-input.w3-round(type="text" name="clube" value=emd ? emd.clube : "" required)
+
+        label Federado
+        input.w3-check.w3-margin-left(type="checkbox" name="federado" checked=emd && emd.federado)
+
+        label.w3-margin-left Resultado (Apto)
+        input.w3-check.w3-margin-left(type="checkbox" name="resultado" checked=emd && emd.resultado)
+
+      button.w3-btn.w3-teal.w3-margin-top(type="submit")= emd ? "Atualizar" : "Submeter"
+      a.w3-btn.w3-blue-grey.w3-margin-top.w3-margin-left(href="/") Cancelar

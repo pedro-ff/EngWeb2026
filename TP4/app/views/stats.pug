@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal
+      h1 Estatísticas EMD
+
+    .w3-container.w3-margin-top
+      each val, key in stats
+        .w3-card-4.w3-margin-bottom
+          header.w3-container.w3-blue-grey
+            h3 Distribuição por #{key}
+          .w3-container
+            table.w3-table-all.w3-margin
+              tr
+                th Valor
+                th Quantidade
+              each count, label in val
+                tr
+                  td= label
+                  td= count
+
+    footer.w3-container.w3-teal
+      a.w3-button.w3-blue-grey.w3-margin(href="/") Voltar
