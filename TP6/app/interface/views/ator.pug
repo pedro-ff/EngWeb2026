@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  .w3-card-4
+    header.w3-container.w3-teal
+      h1 #{a.name}
+
+    .w3-container
+      table.w3-table-all.w3-margin-top
+        tr
+          th ID
+          td= a._id
+        tr
+          th Nome
+          td= a.name
+        tr
+          th Filmes
+          td= a.filmes.join(', ')
+
+    footer.w3-container.w3-light-grey
+      a.w3-btn.w3-round.w3-blue-grey.w3-margin-right(href="/generos") Voltar

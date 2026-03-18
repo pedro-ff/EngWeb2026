@@ -1,0 +1,50 @@
+services:
+  mongodb:
+    build:
+      context: ./api_dados
+      dockerfile: Dockerfile.mongo
+    container_name: mongodb_cinema
+    networks:
+      - cinema-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  api:
+    build:
+      context: ./api_dados
+      dockerfile: Dockerfile
+    container_name: api_dados
+    ports:
+      - "7789:7789"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/cinema
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - cinema-network
+
+  interface:
+    build:
+      context: ./interface
+      dockerfile: Dockerfile.interface
+    container_name: interface_web
+    ports:
+      - "7790:7790"
+    environment:
+      - API_URL=http://api_dados:7789
+    depends_on:
+      api:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - cinema-network
+
+networks:
+  cinema-network:
+    driver: bridge
