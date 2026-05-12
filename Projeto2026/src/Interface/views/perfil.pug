@@ -1,0 +1,100 @@
+extends layout
+
+block content
+  .row
+    .col-quarter
+      .card(style='padding:0')
+        .avatar-wrap
+          - const fotoPerfil = user.fotoPerfil || '/images/perfil_default.png'
+          img(
+            src=fotoPerfil
+            alt='Foto de Perfil'
+            onerror="this.src='/images/perfil_default.png'"
+          )
+          p.avatar-username @#{user.username}
+          if user.nivel === 'administrador'
+            span.badge.badge-dark.mt-1 Administrador
+          else
+            span.badge.badge-muted.mt-1 Consumidor
+
+          //- Formulário de upload de foto (só o próprio)
+          if isDono
+            .avatar-upload
+              form(action='/perfil/foto' method='POST' enctype='multipart/form-data')
+                label
+                  | Alterar foto
+                  input(type='file' name='foto' accept='image/jpeg,image/png,image/gif,image/webp' style='display:none' onchange='this.form.submit()')
+              p.muted.small.mt-1 JPG, PNG, GIF ou WebP · máx. 3 MB
+
+    .col-three-quarters
+      if isDono && sucesso
+        .alert.alert-success.mb-2 #{sucesso}
+      if isDono && erro
+        .alert.alert-error.mb-2 #{erro}
+
+      .card.mb-2
+        .card-header
+          h4
+            if isDono
+              | O Meu Perfil
+            else
+              | Perfil de @#{user.username}
+        .table-wrap
+          table.table-kv
+            tbody
+              tr
+                td Idade
+                td #{user.idade} anos
+              tr
+                td Filiação
+                td #{user.filiacao}
+              tr
+                td Email
+                td #{user.email}
+              tr
+                td Nível de acesso
+                td
+                  if user.nivel === 'administrador'
+                    span.badge.badge-dark Administrador
+                  else
+                    span.badge.badge-muted Consumidor
+              tr
+                td Utilizador desde
+                td
+                  - const dataRegisto = new Date(user.dataRegisto).toLocaleDateString('pt-PT', { year: 'numeric', month: 'long', day: 'numeric' })
+                  | #{dataRegisto}
+              if user.dataUltimoAcesso
+                tr
+                  td Última vez online em
+                  td
+                    - const dataAcesso = new Date(user.dataUltimoAcesso).toLocaleDateString('pt-PT', { hour12: false })
+                    | #{dataAcesso}
+              if user.nivel === 'administrador' && contribuicoes !== null
+                tr
+                  td Nº de contribuições
+                  td: strong #{contribuicoes} registo(s) criado(s)
+
+      .card
+        .card-header
+          h4 Biografia
+        if isDono
+          form(action='/perfil' method='POST')
+            .form-group
+              if user.bio
+                p.muted.small.mb-1 A tua biografia:
+              else
+                p.muted.small.mb-1 Ainda não escreveste nada sobre ti. Apresenta-te!
+              textarea(
+                name='bio'
+                rows='5'
+                maxlength='600'
+                placeholder='Escreve aqui um pouco sobre ti...'
+              ) #{user.bio || ''}
+            p.muted.small.text-right máx. 600 caracteres
+            .form-actions
+              button.btn.btn-primary(type='submit') Guardar biografia
+        else
+          if user.bio
+            p #{user.bio}
+          else
+            p.muted Este utilizador ainda não escreveu uma biografia.

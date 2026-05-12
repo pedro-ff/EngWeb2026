@@ -1,0 +1,82 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: inquiricoes_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: inquiricoes_db
+    volumes:
+      - mongo_data:/data/db
+      - ./data/inquiricoes.json:/docker-entrypoint-initdb.d/inquiricoes.json:ro
+      - ./data/init_db.sh:/docker-entrypoint-initdb.d/01_import.sh:ro
+      - ./data/import_mongo.js:/docker-entrypoint-initdb.d/02_indexes.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--host", "127.0.0.1", "--port", "27017", "--eval", "db.getSiblingDB('inquiricoes_db').getCollectionNames()"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  api:
+    build: ./src/API
+    container_name: inquiricoes_api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://mongo:27017/inquiricoes_db
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET:-jwt_segredo_dev}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  auth:
+    build: ./src/Auth
+    container_name: inquiricoes_auth
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URI: mongodb://mongo:27017/inquiricoes_db
+      PORT: 3002
+      JWT_SECRET: ${JWT_SECRET:-jwt_segredo_dev}
+      SESSION_SECRET: ${SESSION_SECRET:-sessao_segredo_dev}
+    volumes:
+      - ./src/Auth/public/uploads/perfis:/app/public/uploads/perfis
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  interface:
+    build: ./src/Interface
+    container_name: inquiricoes_interface
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    environment:
+      API_URL: http://api:3001
+      AUTH_URL: http://auth:3002
+      PORT: 3000
+
+volumes:
+  mongo_data:

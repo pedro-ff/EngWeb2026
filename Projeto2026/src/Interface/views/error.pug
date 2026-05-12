@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  .card(style='max-width:480px;margin:2rem auto')
+    .card-header
+      h4 Erro #{error.status || 500}
+    .alert.alert-error(style='margin:0;border-radius:0 0 5px 5px;border-left:none') #{message}
+    

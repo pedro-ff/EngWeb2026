@@ -1,0 +1,37 @@
+extends layout
+
+block content
+  h2.mb-2 Caixa de Sugestões
+
+  if erro && erro.length
+    .alert.alert-error.mb-2 #{erro}
+
+  //- Formulário de nova sugestão (todos os utilizadores autenticados)
+  if utilizador
+    .card.mb-3
+      h4.section-title Deixar uma Sugestão
+      form(action='/sugestoes' method='POST')
+        .form-group
+          textarea(name='texto' rows='4' placeholder='Escreve aqui a tua sugestão ou comentário sobre o site...' required)
+        button.btn.btn-primary(type='submit') Enviar Sugestão
+  else
+    .alert.alert-info
+      | #[a(href='/login') Faz login] para deixar uma sugestão.
+
+  //- Lista de sugestões (apenas visível a admins)
+  if utilizador && utilizador.nivel === 'administrador'
+    hr
+    h3.section-title.mt-2 Sugestões Recebidas
+    if sugestoes && sugestoes.length
+      each s in sugestoes
+        .post-card
+          .flex-between
+            p.post-body #{s.texto}
+            form(action=`/sugestoes/${s._id}/apagar` method='POST' style='margin:0;flex-shrink:0')
+              button.btn.btn-danger.btn-sm(type='submit' onclick='return confirm("Apagar esta sugestão?")') Apagar
+          p.post-meta.mt-1 #{s.autor_username} &mdash; #{new Date(s.data).toLocaleDateString('pt-PT')}
+    else
+      p.muted Ainda não há sugestões.
+  else if utilizador
+    .alert.alert-accent.mt-2 A tua sugestão será analisada pelos administradores. Obrigado pelo contributo!
+    

@@ -1,0 +1,20 @@
+extends ../layout
+
+block content
+  h2.mb-1 Índice Antroponímico
+  p.muted.small.mb-2 #{nomes.length} nomes encontrados
+
+  //- Navegação por letra
+  .letter-nav
+    each letra in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+      a(href=`#letra-${letra}`) #{letra}
+
+  //- Lista agrupada por letra inicial
+  - var letraAtual = ''
+  each nome in nomes
+    - var inicial = nome[0].toUpperCase()
+    if inicial !== letraAtual
+      - letraAtual = inicial
+      h3.section-title.mt-2(id=`letra-${inicial}`) #{inicial}
+    ul.index-list
+      li: a(href=`/inquiricoes?requerente=${encodeURIComponent(nome)}`) #{nome}

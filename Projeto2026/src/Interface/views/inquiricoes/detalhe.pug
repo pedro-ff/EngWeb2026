@@ -1,0 +1,171 @@
+extends ../layout
+
+block content
+  .flex-between.mb-2
+    a.btn.btn-ghost(href='/inquiricoes') &larr; Voltar
+    if utilizador && utilizador.nivel === 'administrador'
+      .flex-gap
+        a.btn.btn-primary(href=`/inquiricoes/${inquiricao.proc_numero}/editar`) Editar Registo
+        form(action=`/inquiricoes/${inquiricao.proc_numero}/apagar` method='POST' style='margin:0')
+          button.btn.btn-danger(type='submit' onclick=`return confirm('Tens a certeza que queres apagar o processo ${inquiricao.proc_numero}? Esta ação é irreversível.')`) Apagar Registo
+
+  if erro && erro.length
+    .alert.alert-error #{erro}
+
+  //- Dados do registo
+  .card
+    h2.mb-1 #{inquiricao.titulo}
+    p.muted.small.mb-2 Processo nº #{inquiricao.proc_numero} &mdash; #{inquiricao.repositorio}
+
+    .row
+      .col-half
+        h4.section-title Filiação
+        .table-wrap
+          table.table-kv
+            tbody
+              tr
+                td Requerente
+                td: strong #{inquiricao.requerente || '—'}
+              tr
+                td Pai
+                td #{inquiricao.pai || '—'}
+              tr
+                td Mãe
+                td #{inquiricao.mae || '—'}
+
+      .col-half
+        h4.section-title Localização
+        .table-wrap
+          table.table-kv
+            tbody
+              tr
+                td Freguesia
+                td #{inquiricao.freguesia || '—'}
+              tr
+                td Concelho
+                td
+                  if inquiricao.concelho
+                    a(href=`/inquiricoes?concelho=${inquiricao.concelho}`) #{inquiricao.concelho}
+                  else
+                    | —
+              tr
+                td Distrito
+                td #{inquiricao.distrito || '—'}
+
+    .row.mt-2
+      .col-half
+        h4.section-title Datas
+        .table-wrap
+          table.table-kv
+            tbody
+              tr
+                td Data inicial
+                td #{inquiricao.data_inicial || '—'}
+              tr
+                td Data final
+                td #{inquiricao.data_final || '—'}
+
+      .col-half
+        h4.section-title Arquivo
+        .table-wrap
+          table.table-kv
+            tbody
+              tr
+                td Cota
+                td #{inquiricao.cota_completa || '—'}
+              tr
+                td Caixa
+                td #{inquiricao.caixa || '—'}
+
+    if inquiricao.conteudo
+      .mt-2
+        h4.section-title Conteúdo
+        p #{inquiricao.conteudo}
+
+    if inquiricao.relacoes && inquiricao.relacoes.length
+      .mt-2
+        h4.section-title Relações Genealógicas
+        .table-wrap
+          table
+            thead
+              tr
+                th Nome
+                th Relação
+                th Processo
+            tbody
+              each rel in inquiricao.relacoes
+                tr
+                  td #{rel.nome}
+                  td #{rel.relacao}
+                  td: a(href=`/inquiricoes/${rel.proc_numero}`) #{rel.proc_numero}
+
+  //- Criador do registo
+  if criadorInfo
+    p.muted.small.mt-1
+      | Criado por&nbsp;
+      a(href=`/utilizadores/${criadorInfo.username}`) @#{criadorInfo.username}
+
+  //- Posts
+  .mt-3
+    h3.section-title Posts
+
+    if posts && posts.length
+      each post in posts
+        .post-card
+          .flex-between.mb-1
+            h4(style='margin:0') #{post.titulo}
+            if utilizador && utilizador.nivel === 'administrador'
+              form(action=`/posts/${post._id}/apagar` method='POST' style='margin:0')
+                input(type='hidden' name='proc_numero' value=`${inquiricao.proc_numero}`)
+                button.btn.btn-danger.btn-sm(type='submit' onclick='return confirm("Apagar este post e todos os seus comentários?")') Apagar Post
+          p.post-meta
+            if post.autor_username
+              a(href=`/utilizadores/${post.autor_username}`) @#{post.autor_username}
+            else
+              | Anónimo
+            |  &mdash; #{new Date(post.data).toLocaleDateString('pt-PT')}
+          p.post-body.mt-1 #{post.corpo}
+
+          //- Comentários
+          if post.comentarios && post.comentarios.length
+            .mt-2(style='padding-left:1rem')
+              h5.section-title Comentários
+              each com in post.comentarios
+                .comment-card
+                  .flex-between
+                    p.comment-meta
+                      if com.autor_username
+                        a(href=`/utilizadores/${com.autor_username}`) @#{com.autor_username}
+                      else
+                        | Anónimo
+                      |  &mdash; #{new Date(com.data).toLocaleDateString('pt-PT')}
+                    if utilizador && utilizador.nivel === 'administrador'
+                      form(action=`/posts/${post._id}/comentarios/${com._id}/apagar` method='POST' style='margin:0')
+                        input(type='hidden' name='proc_numero' value=`${inquiricao.proc_numero}`)
+                        button.btn.btn-danger.btn-sm(type='submit' onclick='return confirm("Apagar este comentário?")') Apagar
+                  p.comment-body #{com.texto}
+
+          //- Formulário de comentário
+          if utilizador
+            form.mt-2(action=`/posts/${post._id}/comentarios` method='POST')
+              input(type='hidden' name='proc_numero' value=`${inquiricao.proc_numero}`)
+              .form-group
+                input(type='text' name='texto' placeholder='Adicionar comentário...' required)
+              button.btn.btn-primary.btn-sm(type='submit') Comentar
+    else
+      p.muted Ainda não há posts sobre este registo.
+
+    //- Formulário de novo post
+    if utilizador
+      .card.mt-2
+        h4.section-title Novo Post
+        form(action=`/inquiricoes/${inquiricao.proc_numero}/posts` method='POST')
+          .form-group
+            label Título
+            input(type='text' name='titulo' placeholder='Título' required)
+          .form-group
+            label Conteúdo
+            textarea(name='corpo' rows='4' placeholder='Escreve aqui...' required)
+          button.btn.btn-primary(type='submit') Publicar
+    else
+      p.muted.mt-1: a(href='/login') Faz login para publicar um post.

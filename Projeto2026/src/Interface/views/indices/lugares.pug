@@ -1,0 +1,21 @@
+extends ../layout
+
+block content
+  h2.mb-2 Índice Toponímico
+
+  .row
+    .col-half
+      .card
+        h3.section-title Concelhos
+        p.muted.small.mb-1 #{lugares.concelhos.length} concelhos
+        ul.index-list
+          each concelho in lugares.concelhos
+            li: a(href=`/inquiricoes?concelho=${encodeURIComponent(concelho)}`) #{concelho}
+
+    .col-half
+      .card
+        h3.section-title Distritos
+        p.muted.small.mb-1 #{lugares.distritos.length} distritos
+        ul.index-list
+          each distrito in lugares.distritos
+            li: a(href=`/inquiricoes?distrito=${encodeURIComponent(distrito)}`) #{distrito}

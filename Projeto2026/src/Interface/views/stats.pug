@@ -1,0 +1,52 @@
+extends layout
+
+block content
+  h2.mb-1 Estatísticas
+  p.muted.small.mb-3 Visão geral do arquivo
+
+  //- Total
+  .stats-hero.mb-3
+    .stats-hero-num #{stats.total.toLocaleString('pt-PT')}
+    .stats-hero-label registos no arquivo
+
+  //- Distribuição por distrito
+  .card.mb-3
+    h4.section-title Distribuição por Distrito
+    .chart-wrap(style=`height:${Math.max(300, stats.porDistrito.length * 30)}px`)
+      canvas#grafico-distritos
+
+  //- Top concelhos
+  .card.mb-3
+    h4.section-title Top 10 Concelhos
+    .chart-wrap(style='height:320px')
+      canvas#grafico-concelhos
+
+  //- Distribuição por século + drill-down décadas
+  .card.mb-3
+    h4.section-title Distribuição por Século
+    p.muted.small.mb-2 Clica numa barra para ver a distribuição por década desse século.
+    .chart-wrap(style='height:300px')
+      canvas#grafico-seculos
+    .stats-seculo-drill(id='drill-wrap' style='display:none')
+      hr
+      .flex-between.mb-1
+        h5#drill-titulo(style='margin:0')
+        button#drill-fechar.btn.btn-ghost.btn-sm ✕ Fechar
+      .chart-wrap(style='height:260px')
+        canvas#grafico-decadas
+
+  //- Top requerentes + Top apelidos lado a lado
+  .stats-row.mb-3
+    .card.stats-card
+      h4.section-title Top 10 Requerentes
+      .chart-wrap(style='height:320px')
+        canvas#grafico-requerentes
+    .card.stats-card
+      h4.section-title Top 20 Apelidos
+      .chart-wrap(style='height:600px')
+        canvas#grafico-apelidos
+
+  script.
+    const STATS = !{JSON.stringify(stats)};
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js')
+  script(src='/javascripts/stats.js')

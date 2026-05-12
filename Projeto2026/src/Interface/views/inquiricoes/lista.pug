@@ -1,0 +1,69 @@
+extends ../layout
+
+block content
+  .flex-between.mb-2
+    h2 Registos
+    .flex-gap
+      //- Botão de exportar: passa os filtros ativos e permite escolher formato
+      - const filtrosAtivos = Object.entries(query || {}).filter(([k,v]) => v && k !== 'pagina').map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&')
+      .export-group
+        a.btn.btn-ghost(href=`/export?formato=json${filtrosAtivos ? '&' + filtrosAtivos : ''}` title='Exportar registos visíveis em JSON') ↓ JSON
+        a.btn.btn-ghost(href=`/export?formato=csv${filtrosAtivos ? '&' + filtrosAtivos : ''}` title='Exportar registos visíveis em CSV') ↓ CSV
+      if utilizador && utilizador.nivel === 'administrador'
+        a.btn.btn-accent(href='/inquiricoes/novo') + Novo Registo
+
+  //- Filtros
+  .card.mb-2
+    form(action='/inquiricoes' method='GET')
+      .form-row
+        .form-group
+          label Nome
+          input(type='text' name='requerente' value=query.requerente || '')
+        .form-group
+          label Concelho
+          input(type='text' name='concelho' value=query.concelho || '')
+        .form-group
+          label Distrito
+          input(type='text' name='distrito' value=query.distrito || '')
+        .form-group
+          label Ano
+          input(type='text' name='ano' value=query.ano || '')
+      .form-row.mt-1
+        .form-group.flex-grow
+          label Pesquisa livre
+          input(type='text' name='texto' value=query.texto || '')
+        .form-group.proc-field
+          label Nº de Processo
+          input(type='number' name='proc_numero' value=query.proc_numero || '' min='1' placeholder='Ex: 1234')
+      .form-actions
+        button.btn.btn-primary(type='submit') Pesquisar
+        a.btn.btn-ghost(href='/inquiricoes') Limpar
+
+  p.muted.small.mb-1 #{total} resultado(s) — página #{pagina}
+
+  .table-wrap
+    table
+      thead
+        tr
+          th Processo
+          th Requerente
+          th Pai
+          th Mãe
+          th Data
+          th Concelho
+      tbody
+        each inq in inquiricoes
+          tr
+            td: a(href=`/inquiricoes/${inq.proc_numero}`) #{inq.proc_numero}
+            td #{inq.requerente || '—'}
+            td #{inq.pai || '—'}
+            td #{inq.mae || '—'}
+            td #{inq.data_inicial || '—'}
+            td #{inq.concelho || '—'}
+
+  //- Paginação
+  .pagination
+    if pagina > 1
+      a.btn.btn-ghost(href=`/inquiricoes?${new URLSearchParams(Object.assign({}, query, {pagina: pagina - 1}))}`) &larr; Anterior
+    if pagina * limite < total
+      a.btn.btn-ghost(href=`/inquiricoes?${new URLSearchParams(Object.assign({}, query, {pagina: pagina + 1}))}`) Seguinte &rarr;

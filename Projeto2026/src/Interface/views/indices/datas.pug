@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  h2.mb-1 Índice Cronológico
+  p.muted.small.mb-2 #{anos.length} anos com registos
+
+  .table-wrap
+    table
+      thead
+        tr
+          th Ano
+          th Nº de Registos
+      tbody
+        each entrada in anos
+          tr
+            td: a(href=`/inquiricoes?ano=${entrada.ano}`) #{entrada.ano}
+            td #{entrada.total}

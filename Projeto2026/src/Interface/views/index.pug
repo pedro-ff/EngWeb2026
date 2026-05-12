@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  div(style='margin-bottom:1.5rem')
+    h1 Inquirições de Génere
+    p.muted(style='margin-top:.35rem') Arquivo Distrital de Braga — #{total} registos disponíveis
+
+  //- Pesquisa rápida
+  .card.mb-2
+    h3.section-title Pesquisa
+    form(action='/inquiricoes' method='GET')
+      .form-row
+        .form-group
+          label Nome do requerente
+          input(type='text' name='requerente' placeholder='Ex: Manuel da Silva')
+        .form-group
+          label Concelho
+          input(type='text' name='concelho' placeholder='Ex: Braga')
+        .form-group
+          label Ano
+          input(type='text' name='ano' placeholder='Ex: 1750')
+      .form-actions
+        button.btn.btn-primary(type='submit') Pesquisar
+
+  //- Últimos registos
+  h3.section-title.mt-3 Últimos registos
+  .table-wrap
+    table
+      thead
+        tr
+          th Processo
+          th Requerente
+          th Data
+          th Concelho
+      tbody
+        each inq in inquiricoes
+          tr
+            td: a(href=`/inquiricoes/${inq.proc_numero}`) #{inq.proc_numero}
+            td #{inq.requerente || '—'}
+            td #{inq.data_inicial || '—'}
+            td #{inq.concelho || '—'}
+  .mt-2
+    a.btn.btn-ghost(href='/inquiricoes') Ver todos os registos &rarr;

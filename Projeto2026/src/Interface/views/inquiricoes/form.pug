@@ -1,0 +1,245 @@
+extends ../layout
+
+block content
+  a.btn.btn-ghost.mb-2(href='/inquiricoes') &larr; Voltar
+
+  if erro && erro.length
+    .alert.alert-error.mb-2 #{erro}
+
+  .card
+    h2.mb-2 #{inquiricao && inquiricao.proc_numero ? 'Editar Registo' : 'Novo Registo'}
+
+    - const action = inquiricao && inquiricao.proc_numero ? `/inquiricoes/${inquiricao.proc_numero}/editar` : '/inquiricoes/novo'
+    form(action=action method='POST')
+
+      h4.section-title Identificação
+      .form-row
+        .form-group
+          label Número de Processo
+          input(type='number' name='proc_numero' value=inquiricao && inquiricao.proc_numero ? inquiricao.proc_numero : '' required placeholder='Ex: 1234')
+        .form-group
+          label Título
+          input(type='text' name='titulo' value=inquiricao && inquiricao.titulo ? inquiricao.titulo : '' placeholder='Título do registo')
+
+      .form-row
+        .form-group
+          label Repositório
+          input(type='text' name='repositorio' value=inquiricao && inquiricao.repositorio ? inquiricao.repositorio : '' placeholder='Ex: ADB')
+        .form-group
+          label Cota Completa
+          input(type='text' name='cota_completa' value=inquiricao && inquiricao.cota_completa ? inquiricao.cota_completa : '' placeholder='Ex: PT/UM/ADB/...')
+
+      .form-row
+        .form-group
+          label Caixa
+          input(type='text' name='caixa' value=inquiricao && inquiricao.caixa ? inquiricao.caixa : '')
+        .form-group
+          label Data Inicial
+          input(type='text' name='data_inicial' value=inquiricao && inquiricao.data_inicial ? inquiricao.data_inicial : '' placeholder='Ex: 1800-01-01')
+        .form-group
+          label Data Final
+          input(type='text' name='data_final' value=inquiricao && inquiricao.data_final ? inquiricao.data_final : '' placeholder='Ex: 1800-12-31')
+
+      h4.section-title.mt-2 Filiação
+      .form-row
+        .form-group
+          label Requerente
+          input(type='text' name='requerente' value=inquiricao && inquiricao.requerente ? inquiricao.requerente : '')
+        .form-group
+          label Pai
+          input(type='text' name='pai' value=inquiricao && inquiricao.pai ? inquiricao.pai : '')
+        .form-group
+          label Mãe
+          input(type='text' name='mae' value=inquiricao && inquiricao.mae ? inquiricao.mae : '')
+
+      h4.section-title.mt-2 Localização
+      .form-row
+        .form-group
+          label Freguesia
+          input(type='text' name='freguesia' value=inquiricao && inquiricao.freguesia ? inquiricao.freguesia : '')
+        .form-group
+          label Concelho
+          input(type='text' name='concelho' value=inquiricao && inquiricao.concelho ? inquiricao.concelho : '')
+        .form-group
+          label Distrito
+          input(type='text' name='distrito' value=inquiricao && inquiricao.distrito ? inquiricao.distrito : '')
+
+      h4.section-title.mt-2 Conteúdo
+      .form-group
+        label Descrição / Conteúdo
+        textarea(name='conteudo' rows='4' placeholder='Descrição do conteúdo do documento...') #{inquiricao && inquiricao.conteudo ? inquiricao.conteudo : ''}
+
+      .form-row
+        .form-group
+          label Notas Físicas
+          input(type='text' name='notas_fisicas' value=inquiricao && inquiricao.notas_fisicas ? inquiricao.notas_fisicas : '')
+        .form-group
+          label Nota
+          input(type='text' name='nota' value=inquiricao && inquiricao.nota ? inquiricao.nota : '')
+
+      .form-actions
+        button.btn.btn-primary(type='submit') #{inquiricao && inquiricao.proc_numero ? 'Guardar Alterações' : 'Criar Registo'}
+        a.btn.btn-ghost(href=inquiricao && inquiricao.proc_numero ? `/inquiricoes/${inquiricao.proc_numero}` : '/inquiricoes') Cancelar
+
+  //- Relações genealógicas — fora do form, geridas por AJAX
+  if inquiricao && inquiricao.proc_numero
+    .card.mt-2
+      h4.section-title Relações Genealógicas
+
+      //- Tabela com as relações já existentes
+      #tabela-relacoes
+        if inquiricao.relacoes && inquiricao.relacoes.length
+          .table-wrap
+            table(style='table-layout:fixed')
+              thead
+                tr
+                  th(style='width:22%') Requerente
+                  th(style='width:22%') Relacionado
+                  th(style='width:20%') Grau do requerente
+                  th(style='width:16%')
+              tbody
+                each rel in inquiricao.relacoes
+                  tr(id=`rel-${rel.proc_numero}`)
+                    td: strong #{inquiricao.requerente || '(este registo)'}
+                    td: a(href=`/inquiricoes/${rel.proc_numero}`) #{rel.nome || rel.proc_numero}
+                    td #{rel.relacao_requerente || rel.relacao || '—'}
+                    td
+                      button.btn.btn-danger.btn-sm(
+                        type='button'
+                        onclick=`removerRelacao(${inquiricao.proc_numero}, ${rel.proc_numero}, this)`
+                      ) Remover
+        else
+          p.muted#sem-relacoes Ainda não há relações registadas.
+
+      //- Formulário para adicionar nova relação
+      .rel-form-box
+        h5 Adicionar nova relação
+
+        .form-row
+          .form-group
+            label Requerente
+            input(
+              type='text'
+              value=inquiricao.requerente || `Proc. ${inquiricao.proc_numero}`
+              readonly
+            )
+          .form-group
+            label Nº Processo do Relacionado
+            input#rel-proc-numero(
+              type='number'
+              placeholder='Ex: 1234'
+              min='1'
+            )
+          .form-group
+            label Grau do requerente
+            input#rel-grau-requerente(
+              type='text'
+              placeholder='Ex: sobrinho, neto...'
+            )
+
+        .form-actions
+          button#btn-adicionar-relacao.btn.btn-primary(type='button') + Adicionar relação
+          span#msg-relacao
+
+  if inquiricao && inquiricao.proc_numero
+    script.
+      const PROC_NUMERO = !{JSON.stringify(inquiricao.proc_numero)};
+      const REQUERENTE  = !{JSON.stringify(inquiricao.requerente || '')};
+
+      // ---- Adicionar relação ----
+      document.getElementById('btn-adicionar-relacao').addEventListener('click', async () => {
+        const proc_b = parseInt(document.getElementById('rel-proc-numero').value);
+        const rel_req = document.getElementById('rel-grau-requerente').value.trim();
+        const msg             = document.getElementById('msg-relacao');
+
+        if (!proc_b)   { mostrarMsg('Seleciona um registo relacionado.', 'red'); return; }
+        if (!rel_req)  { mostrarMsg('Preenche o grau do requerente.', 'red');   return; }
+        if (proc_b === PROC_NUMERO) { mostrarMsg('Um registo não se pode relacionar consigo próprio.', 'red'); return; }
+
+        try {
+          const r = await fetch(`/inquiricoes/${PROC_NUMERO}/relacoes/${proc_b}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ relacao: rel_req })
+          });
+          if (!r.ok) {
+            const err = await r.json();
+            mostrarMsg(err.erro || 'Erro ao adicionar relação.', 'red');
+            return;
+          }
+          const dados = await r.json();
+          const nomeRelacionado = dados.relacoes?.find(r => r.proc_numero === proc_b)?.nome || String(proc_b);
+          adicionarLinhaTabela(proc_b, nomeRelacionado, rel_req);
+          document.getElementById('rel-proc-numero').value = '';
+          document.getElementById('rel-grau-requerente').value = '';
+          mostrarMsg('Relação adicionada com sucesso!', 'green');
+        } catch(e) {
+          mostrarMsg('Erro: ' + e.message, 'red');
+        }
+      });
+
+      // ---- Remover relação ----
+      async function removerRelacao(proc_a, proc_b, btn) {
+        if (!confirm(`Remover a relação com o processo ${proc_b}? A relação será removida dos dois registos.`)) return;
+        try {
+          const r = await fetch(`/inquiricoes/${proc_a}/relacoes/${proc_b}`, { method: 'DELETE' });
+          if (!r.ok) {
+            const err = await r.json().catch(() => ({}));
+            alert(err.erro || 'Erro ao remover relação.');
+            return;
+          }
+          const linha = document.getElementById(`rel-${proc_b}`);
+          if (linha) linha.remove();
+          const tbody = document.querySelector('#tabela-relacoes tbody');
+          if (tbody && !tbody.querySelector('tr')) {
+            const semRel = document.getElementById('sem-relacoes');
+            if (!semRel) {
+              const p = document.createElement('p');
+              p.id = 'sem-relacoes'; p.className = 'muted';
+              p.textContent = 'Ainda não há relações registadas.';
+              document.getElementById('tabela-relacoes').appendChild(p);
+            }
+          }
+        } catch(e) {
+          alert('Erro de rede ao remover relação.');
+        }
+      }
+
+      // ---- Helpers ----
+      function adicionarLinhaTabela(proc_b, nome, rel_req) {
+        let tabela = document.querySelector('#tabela-relacoes table');
+        if (!tabela) {
+          const div = document.getElementById('tabela-relacoes');
+          const semRel = document.getElementById('sem-relacoes');
+          if (semRel) semRel.remove();
+          div.innerHTML = `
+            <div class="table-wrap">
+            <table style="table-layout:fixed">
+              <thead><tr>
+                <th style="width:25%">Requerente</th>
+                <th style="width:25%">Relacionado</th>
+                <th style="width:25%">Grau do requerente</th>
+                <th style="width:20%"></th>
+              </tr></thead>
+              <tbody></tbody>
+            </table></div>`;
+          tabela = div.querySelector('table');
+        }
+        const tr = document.createElement('tr');
+        tr.id = `rel-${proc_b}`;
+        tr.innerHTML = `
+          <td><strong>${REQUERENTE || '(este registo)'}</strong></td>
+          <td><a href="/inquiricoes/${proc_b}">${nome || proc_b}</a></td>
+          <td>${rel_req}</td>
+          <td><button class="btn btn-danger btn-sm" type="button"
+              onclick="removerRelacao(${PROC_NUMERO}, ${proc_b}, this)">Remover</button></td>`;
+        tabela.querySelector('tbody').appendChild(tr);
+      }
+
+      function mostrarMsg(texto, cor) {
+        const el = document.getElementById('msg-relacao');
+        el.textContent = texto;
+        el.style.color = cor === 'red' ? '#b91c1c' : '#166534';
+        clearTimeout(el._t);
+        el._t = setTimeout(() => { el.textContent = ''; }, 4000);
+      }

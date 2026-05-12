@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  .auth-card
+    h2 Login
+    if erro
+      .alert.alert-error.mb-2 #{erro}
+    form(action='/login' method='POST')
+      .form-group
+        label Username
+        input(type='text' name='username' required autofocus)
+      .form-group
+        label Password
+        input(type='password' name='password' required)
+      button.btn.btn-primary.btn-block(type='submit') Entrar
+    .mt-2
+      p.muted.small Ainda não tens conta? #[a(href='/registo') Regista-te]

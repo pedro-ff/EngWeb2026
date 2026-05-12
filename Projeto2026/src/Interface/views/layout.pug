@@ -1,0 +1,44 @@
+doctype html
+html(lang='pt')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    title #{title} | Inquirições de Génere
+    link(rel='preconnect' href='https://fonts.googleapis.com')
+    link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin)
+    link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap')
+    link(rel='stylesheet' href='/stylesheets/style.css')
+    link(rel='icon' href='/images/padre.png')
+
+  body
+    //- Barra de navegação
+    nav.site-nav
+      a.brand(href='/') Inquirições de Génere
+      a(href='/inquiricoes') Registos
+      a(href='/stats') Estatísticas
+      .nav-dropdown
+        button.dropdown-toggle Índices &#9662;
+        .nav-dropdown-menu
+          a(href='/indice/nomes') Antroponímico
+          a(href='/indice/lugares') Toponímico
+          a(href='/indice/datas') Cronológico
+      if utilizador
+        a(href='/sugestoes') Sugestões
+        if utilizador.nivel === 'administrador'
+          a(href='/inquiricoes/novo') + Novo Registo
+          a(href='/import') ↑ Importar
+      .nav-right
+        if utilizador
+          a(href='/perfil') @#{utilizador.username}
+          a(href='/logout') Sair
+        else
+          a(href='/login') Login
+          a(href='/registo') Registar
+
+    //- Conteúdo principal
+    main.page-content
+      block content
+
+    //- Rodapé
+    footer.site-footer
+      | Arquivo Distrital de Braga / Universidade do Minho &mdash; #{date}

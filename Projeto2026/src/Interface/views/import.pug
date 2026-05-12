@@ -1,0 +1,94 @@
+extends layout
+
+block content
+  a.btn.btn-ghost.mb-2(href='/inquiricoes') &larr; Voltar
+
+  h2.mb-2 Importar Registos
+
+  //- Formulário de upload
+  .card.mb-2
+    h4.section-title Selecionar ficheiro
+    p.muted.mb-1
+      | Aceita ficheiros
+      strong .json
+      | até 10 MB. Formato esperado: array de registos ou o formato de exportação desta plataforma
+      |  ({ meta, dados }).
+
+    form(action='/import' method='POST' enctype='multipart/form-data')
+      .form-group
+        label Ficheiro JSON
+        input(type='file' name='ficheiro' accept='.json' required)
+      .form-actions
+        button.btn.btn-primary(type='submit') ↑ Importar
+
+  //- Erro de sistema (ficheiro inválido, sem ligação à API, etc.)
+  if erro
+    .alert.alert-error.mb-2 #{erro}
+
+  //- Relatório de resultado
+  if relatorio
+    .card
+      h4.section-title Relatório de Ingestão
+
+      .report-meta.mb-2
+        p
+          strong Ficheiro:
+          | #{relatorio.ficheiro}
+        p
+          strong Data:
+          | #{relatorio.data_importacao}
+        p
+          strong Registos recebidos:
+          | #{relatorio.total_recebidos}
+
+      .report-stats.mb-2
+        .stat-box.stat-ok
+          span.stat-num #{relatorio.inseridos.length}
+          span.stat-label Inseridos
+        .stat-box.stat-warn
+          span.stat-num #{relatorio.duplicados.length}
+          span.stat-label Duplicados
+        .stat-box.stat-err
+          span.stat-num #{relatorio.erros.length}
+          span.stat-label Erros
+
+      //- Inseridos
+      if relatorio.inseridos.length
+        h5.mt-2 ✓ Inseridos com sucesso
+        .table-wrap
+          table
+            thead
+              tr
+                th proc_numero
+            tbody
+              each proc in relatorio.inseridos
+                tr
+                  td: a(href=`/inquiricoes/${proc}`) #{proc}
+
+      //- Duplicados
+      if relatorio.duplicados.length
+        h5.mt-2 ⚠ Ignorados — já existiam na base de dados
+        .table-wrap
+          table
+            thead
+              tr
+                th proc_numero
+            tbody
+              each proc in relatorio.duplicados
+                tr
+                  td: a(href=`/inquiricoes/${proc}`) #{proc}
+
+      //- Erros de validação
+      if relatorio.erros.length
+        h5.mt-2 ✕ Erros de validação
+        .table-wrap
+          table
+            thead
+              tr
+                th Referência
+                th Motivo
+            tbody
+              each err in relatorio.erros
+                tr
+                  td #{err.ref}
+                  td #{err.motivo}

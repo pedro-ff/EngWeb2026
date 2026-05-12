@@ -1,0 +1,62 @@
+extends ../layout
+
+block content
+  .auth-card
+    h2 Criar Conta
+    if erro
+      .alert.alert-error.mb-2 #{erro}
+    form(action='/registo' method='POST')
+      .form-group
+        label Username
+        input(type='text' name='username' required autofocus value=valores && valores.username || '')
+      .form-group
+        label Password
+        .input-with-toggle
+          input#password(type='password' name='password' required)
+          button.toggle-password(type='button' aria-label='Mostrar palavra-passe' data-target='password') 👁
+      .form-group
+        label Confirmar Password
+        .input-with-toggle
+          input#confirmar_password(type='password' name='confirmar_password' required)
+          button.toggle-password(type='button' aria-label='Mostrar confirmação' data-target='confirmar_password') 👁
+        p.field-hint As palavras-passe têm de coincidir.
+      .form-group
+        label Email
+        input(type='email' name='email' required value=valores && valores.email || '')
+      .form-group
+        label Filiação
+        select(name='filiacao' required)
+          option(value='') -- Seleciona --
+          option(value='estudante' selected=valores && valores.filiacao === 'estudante') Estudante
+          option(value='docente' selected=valores && valores.filiacao === 'docente') Docente
+          option(value='investigador' selected=valores && valores.filiacao === 'investigador') Investigador
+          option(value='outro' selected=valores && valores.filiacao === 'outro') Outro
+      .form-group
+        label Idade
+        input(type='number' name='idade' min='1' required value=valores && valores.idade || '')
+      .form-group
+        label Nível
+        select(name='nivel' required)
+          option(value='') -- Seleciona --
+          option(value='consumidor' selected=valores && valores.nivel === 'consumidor') Consumidor
+          option(value='administrador' selected=valores && valores.nivel === 'administrador') Administrador
+      .password-rules
+        p Regras da palavra-passe:
+        ul
+          li Entre 8 e 64 caracteres
+          li Pelo menos uma letra maiúscula e uma minúscula
+          li Pelo menos um dígito (0–9)
+          li Pelo menos dois símbolos especiais: ! # $ % & / ( ) = ?
+      button.btn.btn-primary.btn-block(type='submit') Registar
+    .mt-2
+      p.muted.small Já tens conta? #[a(href='/login') Faz login]
+
+  script.
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.target);
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁';
+      });
+    });
